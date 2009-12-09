@@ -49,7 +49,14 @@ var S3QLtranslator = function (query) {
 					if(entityNames[attr]) {attr =entityNames[attr]+"_id";}
 					s3ql_params += "<"+attr+">"+value+"</"+attr+">";
 				}
+				
 			 }
+			 else if (pi.match(/(D|P|C|R|I|S)(.*)/)) {
+					var id = pi.match(/(D|P|C|R|I|S)(.*)/);
+					attr = entityNames[id[1]]+"_id";
+					value = id[2];
+					s3ql_params += "<"+attr+">"+value+"</"+attr+">";
+			}
 		}
 		s3ql_params += "</where>";
 	}
