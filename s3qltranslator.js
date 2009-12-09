@@ -66,7 +66,7 @@ var S3QLtranslator = function (query) {
 	var span = document.createElement('span');
 	document.body.appendChild(span);
 	span.style.fontWeight = "bold";
-	span.innerHTML = "Your query {"+query+"} translates into XML S3QL format:";
+	span.innerHTML = "Your query {"+query+"} translates into XML S3QL format:<br>";
 	var txt = document.createElement('textarea');
 	document.body.appendChild(txt);
 	txt.cols = 100; 
