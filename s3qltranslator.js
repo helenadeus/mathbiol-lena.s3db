@@ -32,12 +32,14 @@ var S3QLtranslator = function (query) {
 	}
 	target = target[1];
 	
-	var params = targetAndParams.trim().match(/\|(.*)/)[1].trim();
+	var params = targetAndParams.trim().match(/\|(.*)/);
+	
 
 	//Detect if there is more than 1 paramenter
 	var s3ql_params = "";
 	if(params){
 		s3ql_params += "<where>";
+		params = params[1].trim();
 		var p = params.split(",");
 		for (var i=0; i<p.length; i++) {
 			 var pi = p[i].trim();
@@ -47,7 +49,7 @@ var S3QLtranslator = function (query) {
 				var value = attrValue[2].trim();
 				if(attr && value){
 					if(entityNames[attr]) {attr =entityNames[attr]+"_id";}
-					s3ql_params += "<"+attr+">"+value+"</"+attr+">";
+					
 				}
 				
 			 }
@@ -55,8 +57,9 @@ var S3QLtranslator = function (query) {
 					var id = pi.match(/(D|P|C|R|I|S)(.*)/);
 					attr = entityNames[id[1]]+"_id";
 					value = id[2];
-					s3ql_params += "<"+attr+">"+value+"</"+attr+">";
+					
 			}
+			s3ql_params += "<"+attr+">"+value+"</"+attr+">";
 		}
 		s3ql_params += "</where>";
 	}
