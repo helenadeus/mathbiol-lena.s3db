@@ -25,7 +25,7 @@ var S3QLtranslator = function (query) {
 	}
 	
 	
-	var target = targetAndParams.trim().match(/^(D|P|C|R|I|S)/);
+	var target = targetAndParams.trim().match(/^(D|U|P|C|R|I|S)/);
 	if(!target){
 		alert('invalid query - one of D|P|C|R|I|S is required to initialize the query');
 		return false;
