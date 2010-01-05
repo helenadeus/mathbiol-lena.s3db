@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <title> S3DB URI Dereference </title>
+  	<script type="text/javascript" src="http://s3dbcall.mathbiol.googlecode.com/hg/s3dbcall.js"></script>
+	<script type="text/javascript">
+	var dereferece_uri = function (uri, input) {
+	 var sep = "|";
+	 var deref = {};
+	 uri =  uri.replace("?","");
+	 var separate = uri.match(/\|/);
+	 if(!separate){
+		var split = uri.match(/(D|P|U|C|R|I|S)([0-9]+)+/g);
+	 }
+	 else {
+		
+		var split = uri.split(sep);
+	 }
+
+	 if(split){
+		//the last alphanumeric of split is the local id; if length is equal to uri, no distributing
+		
+		deref['uid'] = split[split.length-1];
+		//is there more than 1 D? if yes, then the first identifies the mothership and the second the query deployment
+		if(uri.match(/^http.*(D|http).*/)){
+			deref['ms'] = split[0];
+		}
+		else  {
+			deref['ms'] = 'http://root.s3db.org/';
+		}
+		//Did will be the last of the deployments;
+		for (var i=0;i<split.length; i++) {
+			if(split[i].match(/^D/) || split[i].match(/^http/)){
+				deref['did'] = split[i];
+				
+			}
+		}
+		
+		if(!deref['did'] && typeof(input)!='undefined' && input['url']) {
+			deref['did'] = input['url'];
+		}
+		else if (!deref['did']) {
+			deref['did'] = "";
+		}
+		
+		deref['condensed'] = deref['did']+deref['uid'];
+	 }
+	return deref; 
+	}
+
+	</script>
+ <script type="text/javascript">
+	
+	 did_info = function (deref, ans) {
+		
+		if(ans){
+			if(ans[0].url){
+				deref['num_did'] = deref['did'];
+				deref['did'] = ans[0].url;
+				console.log("Found did url: "+ans[0].url);
+			}
+			else {
+				alert("Did "+deref['did']+" could not be dereferenced!");
+				var fail = 1;
+			}
+		}
+		
+		if(!deref['did'].match(/^http/) && deref['ms'].match(/^http/) && !fail){
+		//If the did is numeric but ms is not; find the url first
+			s3dbcall(deref['ms']+"URI.php?uid="+deref['did'], "did_info('"+deref+"', ans)");
+
+		}
+			
+	 }
+
+	  var deref = dereferece_uri(window.location.search);
+	 did_info(deref);
+
+	
+	 
+ </script>
+ </head>
+
+ <body onload="">
+  
+ </body>
+</html>
