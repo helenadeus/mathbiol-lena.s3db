@@ -15,7 +15,6 @@ var dereferece_uri = function (uri, input) {
 		var split = uri.match(/(D|P|U|C|R|I|S)([0-9]+)+/g);
 	 }
 	 else {
-		
 		var split = uri.split(sep);
 	 }
 

@@ -7,7 +7,7 @@ var actions = ['insert', 'update', 'delete'];
 var element_ids = {P: 'project_id',C1: 'collection_id',C2: 'collection_id',R1: 'rule_id',R2: 'rule_id',I1: 'item_id',I2: 'item_id',S1: 'statement_id',S2: 'statement_id'};
 var elements = ['P','C1','C2', 'R1','R2','I1','I2', 'S1', 'S2'];
 var inputs = {P: { name:'testing', description: 'test s3ql'}, C1: { project_id:'', name:'testC1', description: 'test s3ql'}, C2: { project_id:'', name:'testC2', description: 'test s3ql'},R1: {project_id:'', subject_id:'', verb:'v1', object:'o2'}, R2: {project_id:'', subject_id:'', verb:'v2', object_id:''}, I1:{collection_id:'', name: 'testI'},I2:{collection_id:'', name: 'testI1'}, S1:{item_id:'', rule_id:'', value:'test'}, S2:{item_id:'', rule_id:'', value:''}};
-
+/*
 var S3QLtranslator = function (query) {
 	//start of by reading all that is before the first |
 	var entityNames = {"S":"statement", "R": "rule","C":"collection","I":"item","P":"project","U":"user","D":"deployment"};
@@ -81,7 +81,7 @@ var S3QLtranslator = function (query) {
 	return s3ql_query;
 	
 }
-
+*/
 function get() {
 	var query = unescape(window.location.search.replace("?",""));
 	if(query){
@@ -176,79 +176,118 @@ function batch_of_queries(actI, elI) {
 }
 
 function save(ans, el, act, d) {
+	
 	if(typeof(ans[0][element_ids[el]])!='undefined'){
 		Deps[d][el] = {};
 		Deps[d][el][element_ids[el]] = ans[0][element_ids[el]] ; 
 		document.getElementById('resspan'+d+act+el).innerHTML = "Success";
 		document.getElementById('resspan'+d+act+el).style.color = 'green';
 
-		//can continue from this point...
-		Deps[d][el].success = 1;
-		if(d==Deps.length){
-			elI++;
-			if(typeof(elements[elI])!='undefined'){
-				batch_of_queries(actI, elI);
-			}
-			else {
-				//moving on to other actions;
-				console.log('moving on to other actions');
-			}
-		}
+		
+		var success = 1;
+	}
+	else if (ans[0].error_code==0) {
+		document.getElementById('resspan'+d+act+el).innerHTML = "Success";
+		document.getElementById('resspan'+d+act+el).style.color = 'green';
+		var success = 1;
 	}
 	else {
 		document.getElementById('resspan'+d+act+el).innerHTML = "Failed: "+ans[0].message;
 		document.getElementById('resspan'+d+act+el).style.color = 'red';
-		Deps[d][el] = { success : 0 };
+		var success = 0;
+	}
+	
+	//can continue from this point...
+	if(success){
+		if(d==Deps.length){
+				elI++;
+				
+				if(typeof(elements[elI])!='undefined'){
+					batch_of_queries(actI, elI);
+				}
+				else {
+					//moving on to other actions;
+					actI++;
+					elI=0; //restart from the element;
+					if(typeof(actions[actI])!='undefined'){
+					batch_of_queries(actI, elI);
+					}
+					else {
+						console.log('all done');
+					}
+				}
+			}
 	}
 }
 function queryAssembly(d, act, el) {
 		var q1 = act+'('+el+'|';
 		var tmp = '';
-		for (var i in inputs[el]) {
-			
-			if(typeof(i)!='undefined'){
-				if(tmp!=''){
-					tmp += ',';
+		
+		//if this is an update, then insert should have happened and id of the element is mandatory
+			if(act=='update'){
+					var upd=1;
+					tmp += element_ids[el]+'='+Deps[d][el][element_ids[el]];
 				}
-				if(inputs[el][i]!=''){
-					var val  = inputs[el][i];
-				}
-				else {
-					if(i=='project_id'){
-						var val  = Deps[d].P.project_id;	
-					}
-					else if (i=='subject_id') {
-						var val  = Deps[d].C1.collection_id;	
-					}
-					else if (i=='object_id') {
-						var val  = Deps[d].C2.collection_id;
-					}
-					else if (i=='collection_id') {
-						if(el=='I1'){
-						var val  = Deps[d].C1.collection_id;
-						}
-						else if (el=='I2') {
-						var val  = Deps[d].C2.collection_id;
-						}
-					}
-					else if (i=='item_id') {
-						var val  = Deps[d].I1.item_id;
-					}
-					else if (i=='rule_id') {
-						if(el=='S1'){
-						var val  = Deps[d].R1.rule_id;
-						}
-						else if (el=='S2') {
-						var val  = Deps[d].R1.rule_id;
-						}
-					}
-					else if (i=='value') {
-						var val  = Deps[d].I2.item_id;
-					}
-
-				}
-				tmp += i+'='+val;
+			if(act=='delete'){
+					var del=1;
+					tmp += element_ids[el]+'='+Deps[d][el][element_ids[el]];
+			}
+		
+		if(!del){
+			for (var i in inputs[el]) {
 				
+				
+				if(typeof(i)!='undefined'){
+					
+					
+					if(tmp!=''){
+						tmp += ',';
+					}
+					if(inputs[el][i]!=''){
+						var val  = inputs[el][i];
+						if(upd){
+						var val = inputs[el][i]+"_updated";
+						}
+					}
+					else if(!upd){
+						if(i=='project_id'){
+							var val  = Deps[d].P.project_id;	
+						}
+						else if (i=='subject_id') {
+							var val  = Deps[d].C1.collection_id;	
+						}
+						else if (i=='object_id') {
+							var val  = Deps[d].C2.collection_id;
+						}
+						else if (i=='collection_id') {
+							if(el=='I1'){
+							var val  = Deps[d].C1.collection_id;
+							}
+							else if (el=='I2') {
+							var val  = Deps[d].C2.collection_id;
+							}
+						}
+						else if (i=='item_id') {
+							var val  = Deps[d].I1.item_id;
+						}
+						else if (i=='rule_id') {
+							if(el=='S1'){
+							var val  = Deps[d].R1.rule_id;
+							}
+							else if (el=='S2') {
+							var val  = Deps[d].R1.rule_id;
+							}
+						}
+						else if (i=='value') {
+							var val  = Deps[d].I2.item_id;
+						}
+
+					}
+					if(typeof(val)!='undefined'){
+						tmp += i+'='+val;
+					}
+					
+				}
 			}
 		}
 		q1 += tmp+')';
@@ -275,8 +314,4 @@ function exec(act, el) {
 			s3dbcall(q, 'save(ans, "'+el+'","'+act+'", '+d+')');
 			}
 		}
-}
-
-String.prototype.trim = function () {
-    return this.replace(/^\s*/, "").replace(/\s*$/, "");
 }
