@@ -1,4 +1,4 @@
-var GET;
+var GET = [];
 function get() {
 	var query = unescape(window.location.search.replace("?",""));
 	if(query){
