@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+<script type="text/javascript" src="http://s3dbcall.mathbiol.googlecode.com/hg/s3dbcall.js"></script>
+<script type="text/javascript" src="http://s3db.mathbiol-lena.googlecode.com/hg/s3ql_translator.js"></script>
+<script type="text/javascript" src="http://s3db.mathbiol-lena.googlecode.com/hg/get.js"></script>
+<script type="text/javascript" src="http://s3db.mathbiol-lena.googlecode.com/hg/basic.js"></script>
+<script type="text/javascript" src="http://compstats.mathbiol-lena.googlecode.com/hg/freq.js"></script>
+<link rel="StyleSheet" href="analytics.css" type="text/css"> 
+
+<script type="text/javascript">
+var element_id = {P: 'project_id',C: 'collection_id',R: 'rule_id',I: 'item_id',S: 'statement_id'};
+var S3DBdata = [];
+var S3DBsummary = [];
+var lefty = 30; //how much teh sections are deviated from the left side
+var topsy = 70; //how much teh sections are deviated from the upper side
+get();
+
+function start() {
+	call1();
+}
+
+function call1() {
+	if(typeof(GET['project_id'])!='undefined' && typeof(GET['url'])!='undefined' && typeof(GET['key'])!='undefined'){
+		var url1 = GET['url']+"S3QL.php?key="+GET['key']+"&query=";
+		//list all rules of project
+		var el = "R";
+		var q1 = "select(R|P"+GET['project_id']+")";
+		var url1 = url1+S3QLtranslator(q1);
+		if(!S3DBdata[el]){
+		s3dbcall(url1,'display1(ans, "R")');
+		}
+		
+	}
+}
+function display1(ans, el) {
+	if(ans){
+		S3DBdata[el] = ans;
+		var div = document.createElement('div');
+		div.setAttribute("class","section");
+		div.style.left = lefty+"px";div.style.top = topsy+"px";
+		div.style.height = "100%";
+		div.id = el;
+		document.body.appendChild(div);
+		//Organize according to collection ids
+		var Scollections = [];
+		for (var i=0; i<ans.length; i++) {
+			var span = document.createElement('div');
+			Scollections[i] = ans[i].subject_id;
+			span.id = el+ans[i][element_id[el]];
+			span.q = "S|R"+ans[i][element_id[el]];
+			span.setAttribute("onMouseOver", "this.style.background = '#66FFFF'");
+			span.setAttribute("onMouseOut", "this.style.background = '#FFFFFF'");
+			span.setAttribute("onClick","call2('S', '"+ans[i][element_id[el]]+"')");
+			span.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;"+ans[i].label;
+			
+			//Is there a collection for this Rule subject already?
+			if(!document.getElementById("C"+ans[i].subject_id)) {
+			 var Cdiv = document.createElement('div');Cdiv.id = "C"+ans[i].subject_id;div.appendChild(Cdiv);
+			 //Append a span with a name to this div
+			 var Cname = document.createElement('span');
+			 Cname.innerHTML = ans[i].subject;
+			 Cdiv.appendChild(Cname);
+			 //How many items in here?
+			 Cdiv.setAttribute("onClick","call3('I',"+ans[i][element_id[el]]+")");
+			}
+			else {
+				var Cdiv = 	document.getElementById("C"+ans[i].subject_id);
+			}
+			Cdiv.appendChild(span);
+			//div.appendChild(span);
+		}
+		
+
+	}
+}
+
+function call2(el,id) {
+	if(typeof(GET['project_id'])!='undefined' && typeof(GET['url'])!='undefined' && typeof(GET['key'])!='undefined'){
+		var url2 = GET['url']+"S3QL.php?key="+GET['key']+"&query=";
+		//list all rules of project
+		var q2 = "select(S|R"+id+")";
+		var url2 = url2+S3QLtranslator(q2);
+		if(typeof(S3DBdata[el])=='undefined') { S3DBdata[el] = []; }
+		
+		if(!S3DBdata[el]["R"+id]){
+		s3dbcall(url2,'display2(ans, "S", "'+id+'")');
+		}
+		
+	}
+}
+
+function display2(ans, el, id) {
+	if(ans){
+		S3DBdata[el]["R"+id] = ans;
+		//edit the span with this data - add the number of statements/rule
+		var newSpan = document.createElement('span');
+		newSpan.style.color = '#6600CC';
+		newSpan.innerHTML = " ("+ans.length+" statements)";
+		document.getElementById("R"+id).appendChild(newSpan);
+		
+		
+		var simpleArray = []
+		var conti = 1;
+		for (var i=0; i<ans.length; i++) {
+			
+			simpleArray[i] = ans[i].value; 
+			if(!IsNumeric(ans[i].value)){
+				var conti = 0;
+			}
+		}
+		chart(conti, simpleArray);
+
+	}
+}
+
+function call3(el,id) {
+	if(typeof(GET['project_id'])!='undefined' && typeof(GET['url'])!='undefined' && typeof(GET['key'])!='undefined'){
+		var url3 = GET['url']+"S3QL.php?key="+GET['key']+"&query=";
+		//list all rules of project;
+		var q3 = "select(I|C"+id+")";
+		var url3 = url3+S3QLtranslator(q3);
+		if(typeof(S3DBdata[el])=='undefined') { S3DBdata[el] = []; }
+		
+		if(!S3DBdata[el]["C"+id]){
+		s3dbcall(url3,'display3(ans, "C", "'+id+'")');
+		}
+		
+	}
+}
+
+function display3(ans, el, id) {
+	var Cdiv = document.getElementById("C"+id);
+	if(ans){
+		var span = document.createElement('span');
+		span.innerHTML = " ("+ans.length+" Items)";
+		Cdiv.childNodes[0].insertBefore(span);
+	}
+	
+}
+
+function chart(conti, simpleArray) {
+	
+	//frequency of each class;
+		var FREQ =  freq(simpleArray);
+		//FREQ stores classes in 0; absolute frequencies in 1 and rel freq in 2;
+		var chartURL = "http://chart.apis.google.com/chart?chf=bg,s,00000000|c,s,00000000&chs=500x200&chd=t:";
+		
+		var classes = "";
+		var relFreq = "";
+		var dl = [];
+		for (var d=0; d<FREQ[0].length; d++) {
+			var cl = FREQ[0][d];
+			if(classes!='') {classes += '|';}
+			classes += cl;
+			var rl = Math.round(FREQ[2][cl]*100);
+			dl[d] = rl;
+			var rls = rl+"";
+			if(relFreq!='') {relFreq += ',';}
+			relFreq += rl;
+		};
+		chartURL += relFreq+"&cht=p&chdl="+classes;
+		
+		//Append an image to the right upper corner of the app
+		if(document.getElementById('chart_display')){
+			var div = document.getElementById('chart_display');
+			div.innerHTML = "";
+		}
+		else {
+			var div = document.createElement('div');
+			div.id = "chart_display";		
+		}
+		div.setAttribute("class","section");
+		//div.style.width = "50%";
+		div.style.height = "50%";
+		div.style.left = window.innerWidth/2+lefty+8+"px";
+		div.style.top = topsy+'px';
+		//div.style.border = "3px coral solid";
+		document.body.appendChild(div);
+		var img = document.createElement('img');
+		img.id = 'chart';
+		img.src = chartURL;
+		img.style.position = 'absolute';
+		img.style.top = "80px";
+		img.style.left = "80px";
+		div.appendChild(img);
+
+		//Add a checkbox to switch from pie to bar
+		var radio = document.createElement('input');
+		radio.type = "radio";
+		radio.id = 'graphtypepie';
+		radio.name = 'graphtype';
+		radio.innerHTML = 'Pie';
+		div.appendChild(radio);
+		var newSrc = document.getElementById('chart').src.replace('cht=bvs', 'cht=p');
+		newSrc = newSrc.replace("chl=", "chdl=");
+		//newSrc = newSrc.replace("chs=300x180","chs=300x240");
+		
+		radio.setAttribute('onClick','document.getElementById("chart").src = "'+newSrc+'"');
+		//console.log(newSrc);
+		var txt = document.createElement('span');
+		txt.innerHTML = 'PieChart<br>';
+		div.appendChild(txt);
+		
+		var radio = document.createElement('input');
+		radio.type = "radio";
+		radio.name = 'graphtype';
+		radio.id = 'graphtypebars';
+		div.appendChild(radio);
+		
+		var txt = document.createElement('span');
+		txt.innerHTML = 'BarChart';
+		div.appendChild(txt);
+		var newSrc = document.getElementById('chart').src.replace('cht=p', 'cht=bvs');
+		newSrc = newSrc.replace("chdl=","chl=");
+		//newSrc = newSrc.replace("chs=300x240", "chs=300x180");
+		newSrc = newSrc+"&chds=0,"+array_max(dl); //The maximum of this range
+		//newSrc = newSrc+"&chbh="+(Math.round(FREQ[0].length*100/3))+",10";
+		newSrc = newSrc+"&chbh=a";
+		
+		//console.log(newSrc);
+		radio.setAttribute('onClick','document.getElementById("chart").src = "'+newSrc+'"');
+		//Append a small table with frequencies, 
+		appendFreqTable(FREQ);
+
+	
+}
+
+function appendFreqTable(FREQ) {
+	if(document.getElementById('freq_table')){
+		var div = document.getElementById('freq_table');
+		div.innerHTML = "";
+	}
+	else {
+		var div = document.createElement('div');
+		div.id = 'freq_table';
+		document.body.appendChild(div);
+	}
+	div.setAttribute("class", "section");
+	div.style.left = Math.round(lefty+window.innerWidth/2+8)+"px";
+	div.style.top = Math.round(topsy+window.document.height/2+8)+"px";
+	div.style.height = "50%";
+	div.style.textAlign = "center";
+	var t = document.createElement('table');
+	div.appendChild(t);
+	var tb = document.createElement('tbody');
+	var tr = document.createElement('tr');
+	var td = document.createElement('td');
+	td.innerHTML = 'Class';
+	tr.appendChild(td);
+	var td = document.createElement('td');
+	td.innerHTML = 'Frequency';
+	tr.appendChild(td);
+	t.appendChild(tb);tb.appendChild(tr);
+	t.style.border = '2px #F4F4F4 solid';
+	
+	for (var i=0; i<FREQ[0].length; i++) {
+		var tr = document.createElement('tr');
+		var td = document.createElement('td');
+		td.innerHTML = FREQ[0][i];
+		tr.appendChild(td);
+		var td = document.createElement('td');
+		td.innerHTML = FREQ[1][FREQ[0][i]];
+		tr.appendChild(td);
+		tb.appendChild(tr);
+	}
+	
+	
+	
+	
+
+
+}
+</script>
+ </head>
+
+ <body onload="start()">
+  
+ </body>
+</html>

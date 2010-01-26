@@ -1,0 +1,15 @@
+ html, body {
+      height:100%;
+      margin: 0;
+      padding: 0;
+      border: none;
+   }
+
+.section
+{
+border:3px coral solid;
+width: 50%;
+color: blue;
+position: absolute;
+overflow:auto;
+}
