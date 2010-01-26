@@ -18,15 +18,16 @@ function IsNumeric(sText)
    
    }
 
-Array.prototype.max = function() {
-var max = this[0];
-var len = this.length;
-for (var i = 1; i < len; i++) if (this[i] > max) max = this[i];
+function array_max(arr) {
+var max = arr[0];
+var len = arr.length;
+for (var i = 1; i < len; i++) if (arr[i] > max) max = arr[i];
 return max;
 }
-Array.prototype.min = function() {
-var min = this[0];
-var len = this.length;
-for (var i = 1; i < len; i++) if (this[i] < min) min = this[i];
+
+function array_min(arr) {
+var min = arr[0];
+var len = arr.length;
+for (var i = 1; i < len; i++) if (arr[i] < min) min = arr[i];
 return min;
 }
