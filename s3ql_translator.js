@@ -1,4 +1,3 @@
-
 var S3QLtranslator = function (query) {
 	//start of by reading all that is before the first |
 	var entityNames = {"S":"statement", "R": "rule","C":"collection","I":"item","P":"project","U":"user","D":"deployment"};
