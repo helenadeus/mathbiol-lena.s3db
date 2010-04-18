@@ -31,3 +31,33 @@ var len = arr.length;
 for (var i = 1; i < len; i++) if (arr[i] < min) min = arr[i];
 return min;
 }
+
+//Basic array manipulations
+Array.prototype.sum = function(){
+	for(var i=0,sum=0;i<this.length;sum+=this[i++]);
+	return sum;
+}
+
+Array.prototype.max = function(){
+	return Math.max.apply({},this)
+}
+Array.prototype.min = function(){
+	return Math.min.apply({},this)
+}
+
+ones = function(n){
+	var M = [];
+	for(var i=0;i<n;i++){
+		M[i] = 1;
+	}
+	return M;
+}
+
+zeros = function(n){
+	var M = []
+	for(var i=0;i<n;i++){
+		M[i] = 0;
+	}
+	return M;
+	
+}
