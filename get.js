@@ -5,7 +5,7 @@ function get() {
 		//Separate the parameters of the query
 		
 		var splitQuery = query.split("&");
-		for (var i in splitQuery) {
+		for (var i=0; i<splitQuery.length; i++) {
 			var tmp = splitQuery[i].match(/([A-Za-z0-9_]+)=(.*)/);
 			if(tmp){
 				GET[tmp[1]] = tmp[2];
