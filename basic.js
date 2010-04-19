@@ -61,3 +61,13 @@ zeros = function(n){
 	return M;
 	
 }
+
+function addEvent(event, eventAction, el) {
+	if (el.addEventListener){
+		el.setAttribute('on'+event, eventAction);
+
+	} else if (el.attachEvent){
+		
+		el.attachEvent(event, eventAction);
+	}
+}
