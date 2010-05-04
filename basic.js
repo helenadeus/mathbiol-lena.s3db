@@ -45,6 +45,16 @@ Array.prototype.min = function(){
 	return Math.min.apply({},this)
 }
 
+Array.prototype.compare = function(testArr) {
+    if (this.length != testArr.length) return false;
+    for (var i = 0; i < testArr.length; i++) {
+        if (this[i].compare) { 
+            if (!this[i].compare(testArr[i])) return false;
+        }
+        if (this[i] !== testArr[i]) return false;
+    }
+    return true;
+}
 ones = function(n){
 	var M = [];
 	for(var i=0;i<n;i++){
@@ -71,3 +81,5 @@ function addEvent(event, eventAction, el) {
 		el.attachEvent(event, eventAction);
 	}
 }
+
+
