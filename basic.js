@@ -82,4 +82,11 @@ function addEvent(event, eventAction, el) {
 	}
 }
 
-
+String.prototype.visualLength = function()
+	{
+		var ruler = document.createElement('ruler');ruler.id='ruler';ruler.setAttribute("style",  "visibility: hidden; white-space: nowrap");
+		document.body.appendChild(ruler);
+		ruler.innerHTML = this;
+		return ruler.offsetWidth;
+	}
+	
