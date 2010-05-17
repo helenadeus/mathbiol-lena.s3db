@@ -82,11 +82,11 @@ function addEvent(event, eventAction, el) {
 	}
 }
 
-String.prototype.visualLength = function()
+String.prototype.visualLength = function(style)
 	{
-		var ruler = document.createElement('ruler');ruler.id='ruler';ruler.setAttribute("style",  "visibility: hidden; white-space: nowrap");
+		var styleDisplay = (typeof(style)!='undefined') ?(style+"; visibility: hidden; white-space: nowrap"): "visibility: hidden; white-space: nowrap";
+		var ruler = document.createElement('ruler');ruler.id='ruler';ruler.setAttribute("style",  styleDisplay);
 		document.body.appendChild(ruler);
 		ruler.innerHTML = this;
 		return ruler.offsetWidth;
 	}
-	
