@@ -82,11 +82,13 @@ function addEvent(event, eventAction, el) {
 	}
 }
 
-String.prototype.visualLength = function(style)
+String.prototype.visualLength = function()
 	{
-		var styleDisplay = (typeof(style)!='undefined') ?(style+"; visibility: hidden; white-space: nowrap"): "visibility: hidden; white-space: nowrap";
-		var ruler = document.createElement('ruler');ruler.id='ruler';ruler.setAttribute("style",  styleDisplay);
+		var ruler = document.createElement('ruler');ruler.id='ruler';ruler.setAttribute("style",  "visibility: hidden; white-space: nowrap");
 		document.body.appendChild(ruler);
 		ruler.innerHTML = this;
-		return ruler.offsetWidth;
+		var len = ruler.offsetWidth;
+		document.body.removeChild(ruler);
+		return len;
 	}
+	
