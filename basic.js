@@ -96,7 +96,9 @@ function include(src, path) {
 	if(typeof(path)!=='undefined')
 	{
 		var pathTranslate = 
-					{'s3db_math' : 'http://s3db.mathbiol-lena.googlecode.com/hg/',
+					{
+					's3db' : 'http://js.s3db.googlecode.com/hg/',
+					's3db_math' : 'http://s3db.mathbiol-lena.googlecode.com/hg/',
 					'compstats': 'http://compstats.mathbiol-lena.googlecode.com/hg/',
 					's3dbcall' : 'http://s3dbcall.googlecode.com/hg/'
 					}
