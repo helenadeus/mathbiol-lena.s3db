@@ -91,4 +91,29 @@ String.prototype.visualLength = function()
 		document.body.removeChild(ruler);
 		return len;
 	}
+
+function include(src, path) {
+	if(typeof(path)!=='undefined')
+	{
+		var pathTranslate = 
+					{'s3db_math' : 'http://s3db.mathbiol-lena.googlecode.com/hg/',
+					'compstats': 'http://compstats.mathbiol-lena.googlecode.com/hg/',
+					's3dbcall' : 'http://s3dbcall.googlecode.com/hg/'
+					}
+		var fullSrc = pathTranslate[path]+'/'+src;
+	}
+	else {
+		var fullSrc = src;
+	}
 	
+
+	try {
+		document.write("<script type='text/javascript' src='"+fullSrc+"'</script>");
+	}
+	catch (err) {
+		var fullSrc = path+'/'+src;
+		document.write("<script type='text/javascript' src='"+fullSrc+"'</script>");
+	}
+
+
+}
